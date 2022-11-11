@@ -24,17 +24,19 @@ class LinkNode:
         """Process event"""
         async with AsyncClient(solana_node) as client:
             if self.last_signature is None:
-                txlist = await client.get_signatures_for_address(pk)
+                siglist = await client.get_signatures_for_address(pk)
             else:
-                txlist = await client.get_signatures_for_address(
+                siglist = await client.get_signatures_for_address(
                     pk, until=self.last_signature
                 )
-            for tx in txlist.value:
-                print(tx)
+            for sig in siglist.value:
+                tx = await client.get_transaction(sig.signature)
+                print(tx.value)
                 if self.last_block_time is None or \
-                   tx.block_time > self.last_block_time:
-                    self.last_signature = tx.signature
-                    self.last_block_time = tx.block_time
+                   sig.block_time > self.last_block_time:
+                    self.last_signature = sig.signature
+                    self.last_block_time = sig.block_time
+
     async def event_loop(self, poll_interval):
         """Run event loop"""
         while True:
