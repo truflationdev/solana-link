@@ -1,0 +1,25 @@
+version: "3.3"
+services:
+    api-adapter:
+        build:
+           context: https://github.com/truflation/api-adapter.git#develop
+        ports:
+            - 8081:8081
+            - 8082:8082
+        restart: always
+        env_file:
+            - config.env
+    ipfs:
+        image: ipfs/kubo
+        ports:
+            - 5001:5001
+        volumes:
+            - ipfs-export:/export
+            - ipfs-data:/data/ipfs
+    node-server:
+        build:
+           context: node-server
+
+volumes:
+    ipfs-export:
+    ipfs-data:

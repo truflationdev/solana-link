@@ -3,21 +3,24 @@
 
 import asyncio
 import os
-from dotenv import load_dotenv
+import pprint
+import requests
+
 from solana.rpc.async_api import AsyncClient
 from solana.publickey import PublicKey
 
-load_dotenv()
+pp = pprint.PrettyPrinter()
 
 class LinkNode:
     """Class for link node"""
-    def __init__(self, node, account, poll_interval):
+    def __init__(self, node, account, api_adapter, poll_interval):
         self.poll_interval = poll_interval
         self.last_signature = None
         self.last_block_time = None
         self.account = PublicKey(account)
         self.node = node
         self.client = AsyncClient(self.node)
+        self.http = requests.Session()
     async def process(self):
         """Process event"""
         if self.last_signature is None:
@@ -37,7 +40,7 @@ class LinkNode:
                 self.last_block_time = sig.block_time
     def process_txn(self, txn):
         """Process one txn"""
-        print(txn.value)
+        pp.pprint(txn.value.transaction.meta.log_messages)
     async def event_loop(self, poll_interval: int) -> None:
         """Run event loop"""
         while True:
@@ -51,11 +54,3 @@ class LinkNode:
         """Show startup message"""
         print(f'solana node = {self.node}')
         print(f'solana address = {self.account}')
-
-if __name__ == "__main__":
-    ln = LinkNode(
-        os.getenv('SOLANA_NODE', 'http://api.devnet.solana.com'),
-        os.getenv('SOLANA_ADDRESS'),
-        1
-    )
-    ln.run()
