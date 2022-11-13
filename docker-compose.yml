@@ -19,6 +19,8 @@ services:
     node-server:
         build:
            context: node-server
+        env_file:
+            - config.env
 
 volumes:
     ipfs-export:
