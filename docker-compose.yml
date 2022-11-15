@@ -21,6 +21,8 @@ services:
            context: node-server
         env_file:
             - config.env
+        extra_hosts:
+            - host.docker.internal:host-gateway
 
 volumes:
     ipfs-export:

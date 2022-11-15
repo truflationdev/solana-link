@@ -4,5 +4,4 @@ COPY setup.cfg pyproject.toml install.sh ./
 COPY tests ./tests
 COPY solana_link_node ./solana_link_node
 RUN ["/bin/bash", "install.sh"]
-EXPOSE 8000
-CMD ["python3", "-m", "solana_link_node"]
+CMD ["python3", "-u", "-m", "solana_link_node"]
