@@ -19,8 +19,10 @@ class LinkNode:
         self.last_block_time = None
         self.account = PublicKey(account)
         self.node = node
+        self.api_adapter = api_adapter
         self.client = AsyncClient(self.node)
         self.http = requests.Session()
+
     async def process(self):
         """Process event"""
         if self.last_signature is None:
@@ -38,19 +40,29 @@ class LinkNode:
                sig.block_time > self.last_block_time:
                 self.last_signature = sig.signature
                 self.last_block_time = sig.block_time
+
     def process_txn(self, txn):
         """Process one txn"""
         pp.pprint(txn.value.transaction.meta.log_messages)
+        res = self.handler({'service': 'echo', 'data': '1024'})
+
+    def handler(self, obj):
+        r = self.http.post(self.api_adapter, json=obj)
+        return r.content
+
     async def event_loop(self, poll_interval: int) -> None:
         """Run event loop"""
         while True:
             await self.process()
             await asyncio.sleep(poll_interval)
+
     def run(self) -> None:
         """Start run"""
         self.show_init_message()
         asyncio.run(self.event_loop(self.poll_interval))
+
     def show_init_message(self) -> None:
         """Show startup message"""
         print(f'solana node = {self.node}')
         print(f'solana address = {self.account}')
+        print(f'api adapter = {self.api_adapter}')
